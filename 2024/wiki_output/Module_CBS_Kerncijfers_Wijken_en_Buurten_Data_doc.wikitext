@@ -1,0 +1,63 @@
+{{Documentatie}}
+== Doel ==
+Deze module fungeert als de centrale 'dispatcher' voor het ophalen van Kerncijfers Wijken en Buurten data van het CBS. Het wordt aangeroepen door het sjabloon [[Template:CBS_Kerncijfers_Wijken_en_Buurten_Stat|CBS_Kerncijfers_Wijken_en_Buurten_Stat]].
+
+== Werking ==
+De hoofdfunctie is <code>getStat(frame)</code>. Deze functie:
+# Haalt de parameters <code>jaar</code>, <code>regio</code>, <code>stat</code>, en optioneel <code>bron</code> op uit de sjabloonaanroep.
+# Bepaalt op basis van het <code>jaar</code> welke jaar-specifieke data submodule geladen moet worden (bv. [[Module:CBS_Kerncijfers_Wijken_en_Buurten_Data/2024]]).
+# Laadt de data submodule met <code>require</code> (resultaten worden gecached per paginaweergave).
+# Past aliassen toe op de <code>stat</code> parameter om gebruikersvriendelijke namen te mappen naar interne CBS-sleutels (zie hieronder).
+# Zoekt de data op voor de opgegeven <code>regio</code> en de interne <code>stat</code> sleutel in de geladen submodule.
+# Formatteert de uitvoer:
+#* Geeft <code>nil</code> terug als vereiste parameters ontbreken of als data ontbreekt (het aanroepende sjabloon toont dan meestal '-').
+#* Geeft een foutmelding terug bij ongeldige input of als een module niet geladen kan worden.
+#* Voegt optioneel een bronvermelding toe als <code>bron=ja</code> is opgegeven.
+
+=== Alias Mapping ===
+De <code>getStat</code> functie vertaalt de volgende gebruikersvriendelijke <code>stat</code> namen naar de interne CBS-sleutels die in de data submodules worden gebruikt:
+{| class="wikitable"
+! Gebruikersnaam (<code>stat</code>)
+! Interne CBS Sleutel
+|-
+|-
+| <code>AantalInwoners</code> 
+|| <code>AantalInwoners_5</code>
+|-
+| <code>Bevolkingsdichtheid</code> 
+|| <code>Bevolkingsdichtheid_34</code>
+|-
+| <code>Mannen</code> 
+|| <code>Mannen_6</code>
+|-
+| <code>OppervlakteLand</code> 
+|| <code>OppervlakteLand_123</code>
+|-
+| <code>OppervlakteTotaal</code> 
+|| <code>OppervlakteTotaal_122</code>
+|-
+| <code>OppervlakteWater</code> 
+|| <code>OppervlakteWater_124</code>
+|-
+| <code>Vrouwen</code> 
+|| <code>Vrouwen_7</code>
+|-
+| <code>Woningvoorraad</code> 
+|| <code>Woningvoorraad_35</code>
+|}
+''(Let op: Deze mapping is gedefinieerd in de Lua code van deze dispatcher module zelf.)''
+
+== Data Submodules ==
+De daadwerkelijke data en metadata per jaar worden opgeslagen in submodules. Voorbeeld:
+* [[Module:CBS_Kerncijfers_Wijken_en_Buurten_Data/2024]] bevat de data voor 2024.
+
+Zie de documentatie van een specifieke submodule (bv. [[Module:CBS_Kerncijfers_Wijken_en_Buurten_Data/2024/doc]]) voor details over de datastructuur en de opgenomen statistieken voor dat jaar.
+
+== Afhankelijkheden ==
+* Vereist dat de jaar-specifieke data submodules (bv. <code>Module:CBS_Kerncijfers_Wijken_en_Buurten_Data/2024</code>) bestaan en correct zijn.
+* Wordt aangeroepen door [[Template:CBS_Kerncijfers_Wijken_en_Buurten_Stat|CBS_Kerncijfers_Wijken_en_Buurten_Stat]].
+
+<includeonly>
+<!-- Plaats categorieën voor deze module hier, indien van toepassing -->
+[[Categorie:Wikipedia:Lua modules|CBS Kerncijfers Wijken en Buurten Data]]
+</includeonly>

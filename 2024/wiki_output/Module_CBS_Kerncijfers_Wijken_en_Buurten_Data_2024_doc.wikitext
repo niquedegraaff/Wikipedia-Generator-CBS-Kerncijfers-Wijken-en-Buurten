@@ -1,0 +1,24 @@
+{{Documentatie}}
+Deze submodule bevat de verwerkte data uit de '''Kerncijfers Wijken en Buurten 2024''' dataset van het [[CBS]].
+
+* '''Bron Dataset ID:''' 85984NED ([https://opendata.cbs.nl/statline/#/CBS/nl/dataset/85984NED/table?dl=40544 Link naar CBS StatLine])
+* '''Data Jaar:''' 2024
+* '''Gegenereerd op:''' 2025-04-19T22:18:04.706091+00:00
+
+== Data Structuur ==
+Deze module retourneert een Lua tabel `p` met de volgende structuur:
+* `p.dataset_id` (string): Het ID van de gebruikte CBS dataset.
+* `p.data_year` (number): Het jaar van de data.
+* `p.metadata` (tabel): Metadata voor de opgenomen statistieken. De sleutels zijn de volledige CBS sleutels (bv. <code>AantalInwoners_5</code>).
+* `p.data` (tabel): De kerncijfers per regio. De sleutels zijn de regiocodes (Codering_3, bv. <code>GM0363</code>, <code>WK036301</code>).
+
+=== Belangrijke opmerkingen ===
+* Deze data is '''uitgekleed''' en bevat alleen de volgende statistieken (volledige CBS sleutels): <code>AantalInwoners_5, Bevolkingsdichtheid_34, Mannen_6, OppervlakteLand_123, OppervlakteTotaal_122, OppervlakteWater_124, Vrouwen_7, Woningvoorraad_35</code>.
+* Deze data is '''gefilterd''' en bevat alleen regio's van het type: <code>Gemeente, Wijk</code>. Buurten zijn uitgesloten.
+
+== Gebruik ==
+Deze submodule wordt normaal gesproken niet direct aangeroepen, maar geladen door de hoofdmodule [[Module:CBS_Kerncijfers_Wijken_en_Buurten_Data]] wanneer het [[Template:CBS_Kerncijfers_Wijken_en_Buurten_Stat|CBS_Kerncijfers_Wijken_en_Buurten_Stat]] sjabloon wordt gebruikt met <code>jaar=2024</code>.
+
+<includeonly>
+<!-- Plaats categorieën specifiek voor deze datamodule hier, indien nodig -->
+</includeonly>

@@ -37,7 +37,7 @@ STRIPPED_DATA_CACHE_FILENAME = "stripped_filtered_data_{year}.json" # Added 'fil
 # Map voor template bestanden
 TEMPLATE_DIR = "templates"
 
-# --- Wiki Paden en Namen ---
+# --- Wiki Paden en Namen (Constanten voor duidelijkheid) ---
 LUA_DISPATCHER_MODULE_PATH = "Module:CBS_Kerncijfers_Wijken_en_Buurten_Data"
 TEMPLATE_STAT_PATH = "Template:CBS_Kerncijfers_Wijken_en_Buurten_Stat"
 TEMPLATE_INFO_PATH = "Template:CBS_Kerncijfers_Wijken_en_Buurten"
@@ -103,14 +103,12 @@ def load_and_strip_typed_data(filepath, identifier_key, region_type_key, target_
     """Laadt TypedDataSet, filtert op regio type, en behoudt alleen vereiste volledige sleutels."""
     print(f"Laden, filteren ({'/'.join(target_region_types)}), en strippen {filepath}...")
     stripped_data = {}
-    # keys_to_keep bevat nu identifier + de volledige vereiste stat sleutels
     keys_to_keep_set = set(full_keys_to_keep)
     keys_to_keep_set.add(identifier_key)
 
     try:
-        # Laad de volledige data (geheugen-intensieve stap)
         full_data = load_json(filepath)
-        if full_data is None: # Check of laden mislukt is
+        if full_data is None:
             print(f"Fout: Kon bronbestand {filepath} niet laden voor stripping.")
             return None
 
@@ -118,72 +116,42 @@ def load_and_strip_typed_data(filepath, identifier_key, region_type_key, target_
         processed_count = 0
         filtered_out_count = 0
         for record in full_data:
-            # --- Filter Stap ---
             region_type_cleaned = clean_key(record.get(region_type_key))
             if region_type_cleaned not in target_region_types:
-                filtered_out_count += 1
-                continue # Sla dit record over indien geen Gemeente of Wijk
-            # --- Einde Filter Stap ---
+                filtered_out_count += 1; continue
 
             region_code = clean_key(record.get(identifier_key))
             if region_code:
-                # Maak een nieuwe dictionary met alleen de vereiste stats
-                stats_for_region = {}
-                # --- Gebruik de opgegeven set van volledige sleutels ---
-                for full_key in keys_to_keep_set:
-                    # Check of sleutel bestaat in origineel record
-                    if full_key in record:
-                         # Sla op met volledige sleutel ('AantalInwoners_5')
-                         stats_for_region[full_key] = record[full_key]
-                # --- Einde Gebruik de opgegeven set ---
-
-                # Check of identifier bestaat en minstens één *andere* vereiste sleutel gevonden is
-                has_required_stat = any(k in stats_for_region for k in full_keys_to_keep) # Check tegen originele vereiste set
+                stats_for_region = {k: record[k] for k in keys_to_keep_set if k in record}
+                has_required_stat = any(k in stats_for_region for k in full_keys_to_keep)
 
                 if identifier_key in stats_for_region and has_required_stat:
-                     # Excludeer identifier sleutel van de value dict
-                     value_dict = {k: v for k, v in stats_for_region.items() if k != identifier_key}
-                     stripped_data[region_code] = value_dict
-                     processed_count += 1
-                # Optioneel: Log indien regio identifier had maar geen vereiste stats?
+                    value_dict = {k: v for k, v in stats_for_region.items() if k != identifier_key}
+                    stripped_data[region_code] = value_dict
+                    processed_count += 1
 
         print(f"  {filtered_out_count} records uitgefilterd (Buurten, etc.).")
         print(f"  Succesvol data gestript voor {processed_count} regio's (Gemeenten/Wijken).")
-        del full_data # Verwijder expliciet groot object
-        gc.collect() # Adviseer garbage collection
+        del full_data; gc.collect()
         return stripped_data
-
     except Exception as e:
         print(f"Onverwachte fout tijdens filteren/strippen van {filepath}: {e}")
         return None
 
 def format_lua_value(value):
-    """Formatteert Python waarden voor Lua, inclusief strings en None/null."""
-    if value is None:
-        return "nil"
-    elif isinstance(value, bool):
-        return str(value).lower() # Lua gebruikt 'true'/'false'
-    elif isinstance(value, (int, float)):
-        # Behandel potentiële NaN of Inf
-        if value != value: # Check voor NaN
-            return "nil --[[NaN]]"
-        if value == float('inf'):
-            return "nil --[[Infinity]]"
-        if value == float('-inf'):
-            return "nil --[[-Infinity]]"
+    """Formatteert Python waarden voor Lua."""
+    if value is None: return "nil"
+    if isinstance(value, bool): return str(value).lower()
+    if isinstance(value, (int, float)):
+        if value != value: return "nil --[[NaN]]"
+        if value == float('inf'): return "nil --[[Infinity]]"
+        if value == float('-inf'): return "nil --[[-Infinity]]"
         return str(value)
-    elif isinstance(value, str):
-        # 1. Strip leidende/volgende witruimte *van de originele string inhoud*
-        processed_value = value.strip()
-        # 2. Vervang letterlijke newlines en carriage returns met escaped \\n
-        processed_value = processed_value.replace('\r\n', '\\n').replace('\n', '\\n').replace('\r', '\\n')
-        # 3. Escape backslashes en dubbele aanhalingstekens
-        processed_value = processed_value.replace('\\', '\\\\').replace('"', '\\"')
-        # 4. Geef de verwerkte string terug tussen dubbele aanhalingstekens
-        return f'"{processed_value}"'
-    else:
-        # Fallback: probeer als string weer te geven, voeg commentaar toe
-        return f'"{str(value)}" --[[Onbekend Type: {type(value)}]]'
+    if isinstance(value, str):
+        processed = value.strip().replace('\r\n', '\\n').replace('\n', '\\n').replace('\r', '\\n')
+        processed = processed.replace('\\', '\\\\').replace('"', '\\"')
+        return f'"{processed}"'
+    return f'"{str(value)}" --[[Onbekend Type: {type(value)}]]'
 
 def apply_template(template_filename, replacements):
     """Leest een template bestand en voert vervangingen uit."""
@@ -192,7 +160,6 @@ def apply_template(template_filename, replacements):
         with open(tpl_path, 'r', encoding='utf-8') as f:
             content = f.read()
         for placeholder, value in replacements.items():
-            # Zorg ervoor dat de waarde een string is voor replace
             content = content.replace(placeholder, str(value))
         return content
     except FileNotFoundError:
@@ -204,7 +171,7 @@ def apply_template(template_filename, replacements):
 
 def write_output_file(content, output_filename):
     """Schrijft content naar het output bestand."""
-    if content is None: return # Doe niets als content None is
+    if content is None: return False # Geef aan dat er niets geschreven is
     try:
         os.makedirs(os.path.dirname(output_filename), exist_ok=True)
         with open(output_filename, 'w', encoding='utf-8') as f:
@@ -215,9 +182,9 @@ def write_output_file(content, output_filename):
         print(f"Fout bij schrijven output bestand {output_filename}: {e}")
         return False
 
-def generate_lua_data_submodule(stripped_data, metadata_dict, key_map, dataset_id, year, lua_filename):
-    """Genereert de JAARLIJKSE Lua data submodule vanuit een template."""
-    print(f"Genereren Lua data submodule: {lua_filename}...")
+def generate_lua_data_submodule(stripped_data, metadata_dict, key_map, dataset_id, year, lua_filename, lua_doc_filename):
+    """Genereert de JAARLIJKSE Lua data submodule EN de bijbehorende documentatie."""
+    print(f"Genereren Lua data submodule en doc: {os.path.basename(lua_filename)}, {os.path.basename(lua_doc_filename)}...")
 
     full_keys_required_set = set(key_map.values())
 
@@ -237,43 +204,88 @@ def generate_lua_data_submodule(stripped_data, metadata_dict, key_map, dataset_i
     for region_code in sorted(stripped_data.keys()):
         stats = stripped_data[region_code]
         stat_entries = []
-        for stat_key in sorted(stats.keys()): # These are full keys
+        for stat_key in sorted(stats.keys()):
              stat_entries.append(f'    ["{stat_key}"] = {format_lua_value(stats[stat_key])},')
         data_entries_list.append(f'  ["{region_code}"] = {{\n' + '\n'.join(stat_entries) + '\n  },')
     data_entries_str = "\n".join(data_entries_list)
 
-    # -- Vul template in --
-    replacements = {
+    # -- Vul template voor Lua code in --
+    generation_timestamp = datetime.now(timezone.utc).isoformat()
+    module_replacements = {
         '%%YEAR%%': year,
         '%%DATASET_ID%%': dataset_id,
-        '%%GENERATION_TIMESTAMP%%': datetime.now(timezone.utc).isoformat(),
+        '%%GENERATION_TIMESTAMP%%': generation_timestamp,
         '%%REGION_TYPES%%': ", ".join(sorted(TARGET_REGION_TYPES)),
-        '%%STATS_LIST_FULL%%': ", ".join(sorted(full_keys_required_set)), # Internal keys
+        '%%STATS_LIST_FULL%%': ", ".join(sorted(full_keys_required_set)),
         '%%METADATA_ENTRIES%%': metadata_entries_str,
         '%%DATA_ENTRIES%%': data_entries_str,
     }
-    module_content = apply_template("module_data.lua", replacements) # Gebruik .lua hier
+    module_content = apply_template("module_data.lua", module_replacements)
     write_output_file(module_content, lua_filename)
+
+    # --- Genereer Documentatie ---
+    doc_replacements = {
+        '%%YEAR%%': year,
+        '%%DATASET_ID%%': dataset_id,
+        '%%GENERATION_TIMESTAMP%%': generation_timestamp,
+        '%%REGION_ID_KEY%%': REGION_IDENTIFIER_KEY,
+        '%%STATS_LIST_FULL%%': ", ".join(sorted(full_keys_required_set)),
+        '%%REGION_TYPES%%': ", ".join(sorted(TARGET_REGION_TYPES)),
+        '%%LUA_DISPATCHER_PATH%%': LUA_DISPATCHER_MODULE_PATH,
+        '%%TEMPLATE_STAT_PATH%%': TEMPLATE_STAT_PATH,
+        '%%TEMPLATE_STAT_NAME%%': TEMPLATE_STAT_PATH.split(':', 1)[1],
+    }
+    module_doc_content = apply_template("module_data_doc.wikitext", doc_replacements)
+    write_output_file(module_doc_content, lua_doc_filename)
 
 def generate_dispatcher_lua(key_map, output_filename):
     """Genereert de Dispatcher Lua module vanuit een template (voor handmatige upload)."""
-    print(f"Genereren Dispatcher Lua module (voor handmatig kopiëren): {output_filename}...")
+    print(f"Genereren Dispatcher Lua module (voor handmatig kopiëren): {os.path.basename(output_filename)}...")
 
     alias_mapping_block_list = []
     for base_name, full_key in key_map.items():
         if base_name != full_key:
-          alias_mapping_block_list.append("    if stat_alias == '{}' then internal_stat_key = '{}' end".format(base_name, full_key))
+            alias_mapping_block_list.append(f"    if stat_alias == '{base_name}' then internal_stat_key = '{full_key}' end")
 
     replacements = {
-        '%%MODULE_BASE_NAME%%': LUA_DISPATCHER_MODULE_PATH.split(':')[1],
+        '%%MODULE_BASE_NAME%%': LUA_DISPATCHER_MODULE_PATH.split(':')[1], # Naam zonder 'Module:'
         '%%ALIAS_MAPPING_BLOCK%%': "\n".join(alias_mapping_block_list)
     }
-    dispatcher_content = apply_template("module_dispatcher.lua", replacements) # Gebruik .lua hier
+    dispatcher_content = apply_template("module_dispatcher.lua", replacements)
     write_output_file(dispatcher_content, output_filename)
+
+def generate_dispatcher_doc(key_map, year, dataset_id, output_doc_filename):
+    """Genereert de documentatie voor de Dispatcher Lua module vanuit een template."""
+    print(f"Genereren Dispatcher Lua documentatie: {os.path.basename(output_doc_filename)}...")
+
+    # Bouw Wikitext tabelrijen voor aliassen
+    alias_table_rows_list = []
+    for base_name in sorted(key_map.keys()):
+        full_key = key_map[base_name]
+        # Alleen rijen toevoegen als het een echte alias is
+        if base_name != full_key:
+            row = f"|-\n| <code>{base_name}</code> \n|| <code>{full_key}</code>"
+            alias_table_rows_list.append(row)
+
+    # Definieer placeholders en hun waarden
+    replacements = {
+        '%%TEMPLATE_STAT_PATH%%': TEMPLATE_STAT_PATH,
+        '%%TEMPLATE_STAT_NAME%%': TEMPLATE_STAT_PATH.split(':', 1)[1],
+        '%%LUA_DISPATCHER_PATH%%': LUA_DISPATCHER_MODULE_PATH,
+        '%%LUA_DATA_SUBMODULE_EXAMPLE_PATH%%': f"{LUA_DISPATCHER_MODULE_PATH}/{year}", # Gebruik huidig jaar als voorbeeld
+        '%%EXAMPLE_YEAR%%': str(year),
+        '%%ALIAS_TABLE_ROWS%%': "\n".join(alias_table_rows_list) if alias_table_rows_list else "|-\n| ''(Geen aliassen gedefinieerd)'' \n|| -", # Fallback als er geen aliassen zijn
+        # %%DATASET_ID%% en andere placeholders indien nodig in de doc template
+        '%%DATASET_ID%%': dataset_id,
+    }
+
+    # Pas template toe en schrijf weg
+    dispatcher_doc_content = apply_template("module_dispatcher_doc.wikitext", replacements)
+    write_output_file(dispatcher_doc_content, output_doc_filename)
 
 def generate_wikitemplates(metadata_dict, key_map, year, dataset_id, stat_filename, info_filename, stat_doc_filename, info_doc_filename):
     """Genereert de Wiki sjabloon boilerplate/documentatie IN HET NEDERLANDS vanuit templates."""
-    print("Genereren Nederlandse Wikitext sjablonen vanuit templates...")
+    print(f"Genereren Nederlandse Wikitext sjablonen vanuit templates...")
 
     # Paden en namen setup
     lua_data_submodule_path = f"{LUA_DISPATCHER_MODULE_PATH}/{year}"
@@ -292,14 +304,13 @@ def generate_wikitemplates(metadata_dict, key_map, year, dataset_id, stat_filena
 
     # --- Sjabloon: ... Stat ---
     stat_replacements = {
-        # De %%INVOKE_CALL%% placeholder in het template bestand bevat al de juiste syntax
-        # We hoeven alleen de dynamische delen in te vullen
-        '%%MODULE_INVOKE_PATH%%': LUA_DISPATCHER_MODULE_PATH.split(':', 1)[1], # Geeft 'CBS_Kerncijfers_Wijken_en_Buurten_Data'
-        '%%YEAR%%': str(year), # Standaard jaar voor {{{jaar|...}}}
+        '%%MODULE_INVOKE_PATH%%': LUA_DISPATCHER_MODULE_PATH.split(':', 1)[1],
+        '%%YEAR%%': str(year),
     }
     stat_content = apply_template("template_stat.wikitext", stat_replacements)
     write_output_file(stat_content, stat_filename)
 
+    # --- Documentatie voor Stat Sjabloon (/doc pagina) ---
     available_stats_table_rows = []
     for base_name in user_facing_keys: # Al gesorteerd
         full_key = key_map[base_name]
@@ -307,17 +318,11 @@ def generate_wikitemplates(metadata_dict, key_map, year, dataset_id, stat_filena
         title = meta.get('Title', 'N/A')
         unit = meta.get('Unit', '')
         unit_str = f" ({unit})" if unit else ""
-        # Maak de details string (bv. CBS sleutel info)
         details = f"CBS: <code>{full_key}</code>" if base_name != full_key else ""
-
-        # Bouw de Wikitext rij
-        # |-
-        # | Sleutel || Omschrijving || Details
         row = f"|-\n| <code>{base_name}</code> \n|| {title}{unit_str} \n|| {details}"
         available_stats_table_rows.append(row)
-
     available_stats_table_str = "\n".join(available_stats_table_rows)
-    
+
     stat_doc_replacements = {
         '%%TEMPLATE_STAT_NAME%%': template_stat_name,
         '%%YEAR%%': str(year),
@@ -329,7 +334,7 @@ def generate_wikitemplates(metadata_dict, key_map, year, dataset_id, stat_filena
         '%%LUA_DATA_SUBMODULE_PATH%%': lua_data_submodule_path,
         '%%DATASET_ID%%': dataset_id,
     }
-    stat_doc_content = apply_template("template_stat_doc.wikitext", stat_doc_replacements) # Gebruik .wikitext hier
+    stat_doc_content = apply_template("template_stat_doc.wikitext", stat_doc_replacements)
     write_output_file(stat_doc_content, stat_doc_filename)
 
     # --- Sjabloon: ... Info ---
@@ -337,7 +342,7 @@ def generate_wikitemplates(metadata_dict, key_map, year, dataset_id, stat_filena
         '%%TEMPLATE_STAT_PATH%%': TEMPLATE_STAT_PATH,
         '%%TEMPLATE_STAT_NAME%%': template_stat_name
     }
-    info_content = apply_template("template_info.wikitext", info_replacements) # Gebruik .wikitext hier
+    info_content = apply_template("template_info.wikitext", info_replacements)
     write_output_file(info_content, info_filename)
 
     # --- Documentatie voor Info Sjabloon (/doc pagina) ---
@@ -351,7 +356,7 @@ def generate_wikitemplates(metadata_dict, key_map, year, dataset_id, stat_filena
         '%%REGION_TYPES%%': included_regions_str,
         '%%DATASET_ID%%': dataset_id,
     }
-    info_doc_content = apply_template("template_info_doc.wikitext", info_doc_replacements) # Gebruik .wikitext hier
+    info_doc_content = apply_template("template_info_doc.wikitext", info_doc_replacements)
     write_output_file(info_doc_content, info_doc_filename)
 
 
@@ -382,12 +387,15 @@ if __name__ == "__main__":
     # Definieer Wiki paden en output bestandsnamen
     lua_data_submodule_path = f"{LUA_DISPATCHER_MODULE_PATH}/{TARGET_YEAR}"
     lua_data_submodule_filename = os.path.join(OUTPUT_DIR, f"{LUA_DISPATCHER_MODULE_PATH.replace(':', '_')}_{TARGET_YEAR}.lua")
+    lua_data_submodule_doc_filename = os.path.join(OUTPUT_DIR, f"{LUA_DISPATCHER_MODULE_PATH.replace(':', '_')}_{TARGET_YEAR}_doc.wikitext")
+
     template_stat_filename = os.path.join(OUTPUT_DIR, f"{TEMPLATE_STAT_PATH.replace(':', '_')}.wikitext")
     template_info_filename = os.path.join(OUTPUT_DIR, f"{TEMPLATE_INFO_PATH.replace(':', '_')}.wikitext")
     template_stat_doc_filename = os.path.join(OUTPUT_DIR, f"{TEMPLATE_STAT_PATH.replace(':', '_')}_doc.wikitext")
     template_info_doc_filename = os.path.join(OUTPUT_DIR, f"{TEMPLATE_INFO_PATH.replace(':', '_')}_doc.wikitext")
-    dispatcher_lua_output_filename = os.path.join(OUTPUT_DIR, f"{LUA_DISPATCHER_MODULE_PATH.replace(':', '_')}_DISPATCHER_MANUAL_COPY.lua") # Voor handmatige upload
-
+    dispatcher_lua_output_filename = os.path.join(OUTPUT_DIR, f"{LUA_DISPATCHER_MODULE_PATH.replace(':', '_')}_DISPATCHER_MANUAL_COPY.lua")
+    dispatcher_lua_doc_output_filename = os.path.join(OUTPUT_DIR, f"{LUA_DISPATCHER_MODULE_PATH.replace(':', '_')}_doc.wikitext")
+    
     # --- Start Proces ---
     print(f"--- Start KWB Generator {TARGET_YEAR} (Templates, Suffix-Agnostisch) ---")
     print(f"Benodigde Stats (basisnamen): {', '.join(REQUIRED_STATS_BASE_NAMES)}")
@@ -447,13 +455,17 @@ if __name__ == "__main__":
             print(f"NOTE: Cache reflecteert basisnamen: {', '.join(REQUIRED_STATS_BASE_NAMES)}.")
     if processed_data is None: print("AFGEBROKEN: Kon data niet verkrijgen."); sys.exit(1)
 
-    # 5. Genereer Lua Data Submodule
-    generate_lua_data_submodule(processed_data, metadata_dict, key_map, dataset_id, TARGET_YEAR, lua_data_submodule_filename)
+    # 5. Genereer Lua Data Submodule EN Documentatie
+    generate_lua_data_submodule(
+        processed_data, metadata_dict, key_map, dataset_id, TARGET_YEAR,
+        lua_data_submodule_filename, lua_data_submodule_doc_filename
+    )
 
     # 6. Genereer Dispatcher Lua code (voor handmatige upload)
-    generate_dispatcher_lua(key_map, dispatcher_lua_output_filename)
+    generate_dispatcher_lua(key_map, dispatcher_lua_output_filename)    
+    generate_dispatcher_doc(key_map, TARGET_YEAR, dataset_id, dispatcher_lua_doc_output_filename)
 
-    # 7. Genereer Wiki Sjablonen en Documentatie
+    # 7. Genereer Wiki Sjablonen en Hun Documentatie
     generate_wikitemplates(
         metadata_dict, key_map, TARGET_YEAR, dataset_id,
         template_stat_filename, template_info_filename,
@@ -466,6 +478,8 @@ if __name__ == "__main__":
     print(f"Gegenereerde bestanden staan in: {OUTPUT_DIR}")
     print(f"  - Lua Data Submodule: {os.path.basename(lua_data_submodule_filename)}")
     print(f"    -> Upload naar Wiki Pagina: '{lua_data_submodule_path}'")
+    print(f"  - Lua Data Submodule Doc: {os.path.basename(lua_data_submodule_doc_filename)}")
+    print(f"    -> Upload naar Wiki Pagina: '{lua_data_submodule_path}/doc'")
     print(f"  - Stat Sjabloon: {os.path.basename(template_stat_filename)}")
     print(f"    -> Upload naar Wiki Pagina: '{TEMPLATE_STAT_PATH}'")
     print(f"  - Stat Sjabloon Doc: {os.path.basename(template_stat_doc_filename)}")
@@ -473,9 +487,13 @@ if __name__ == "__main__":
     print(f"  - Info Sjabloon: {os.path.basename(template_info_filename)}")
     print(f"    -> Upload naar Wiki Pagina: '{TEMPLATE_INFO_PATH}'")
     print(f"  - Info Sjabloon Doc: {os.path.basename(template_info_doc_filename)}")
+    print(f"  - Dispatcher Lua Doc: {os.path.basename(dispatcher_lua_doc_output_filename)}")
     print(f"    -> Upload naar Wiki Pagina: '{TEMPLATE_INFO_PATH}/doc'")
     print(f"  - Dispatcher Lua (Handmatig): {os.path.basename(dispatcher_lua_output_filename)}")
     print(f"\n!!! BELANGRIJK: Handmatige Actie Nodig !!!")
-    print(f"1. Creëer/Update de hoofdmodule '{LUA_DISPATCHER_MODULE_PATH}' op de wiki.")
-    print(f"2. Kopieer de inhoud van '{os.path.basename(dispatcher_lua_output_filename)}' hiernaartoe.")
-    print(f"3. Upload de inhoud van de andere gegenereerde bestanden naar hun respectievelijke pagina's zoals hierboven aangegeven.")
+    if os.path.exists(dispatcher_lua_output_filename):
+        print(f"1. Creëer/Update de hoofdmodule '{LUA_DISPATCHER_MODULE_PATH}' op de wiki.")
+        print(f"2. Kopieer de inhoud van '{os.path.basename(dispatcher_lua_output_filename)}' hiernaartoe.")
+    else:
+         print(f"1. CREËER de hoofdmodule '{LUA_DISPATCHER_MODULE_PATH}' handmatig op de wiki met de Lua code!")
+    print(f"3. Upload de inhoud van de andere gegenereerde bestanden (incl. /doc) naar hun respectievelijke pagina's.")

@@ -1,5 +1,5 @@
 -- KWB Data Submodule 2024 (Dataset: 85984NED)
--- Automatisch gegenereerd: 2025-04-19T21:48:48.928552+00:00
+-- Automatisch gegenereerd: 2025-04-19T22:18:04.706091+00:00
 -- Filtered: Gemeente, Wijk | Stripped stats (full keys): AantalInwoners_5, Bevolkingsdichtheid_34, Mannen_6, OppervlakteLand_123, OppervlakteTotaal_122, OppervlakteWater_124, Vrouwen_7, Woningvoorraad_35
 local p = {}
 

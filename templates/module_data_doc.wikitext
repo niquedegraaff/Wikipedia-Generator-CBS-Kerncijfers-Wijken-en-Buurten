@@ -1,0 +1,24 @@
+{{Documentatie}}
+Deze submodule bevat de verwerkte data uit de '''Kerncijfers Wijken en Buurten %%YEAR%%''' dataset van het [[CBS]].
+
+* '''Bron Dataset ID:''' %%DATASET_ID%% ([https://opendata.cbs.nl/statline/#/CBS/nl/dataset/%%DATASET_ID%%/table?dl=40544 Link naar CBS StatLine])
+* '''Data Jaar:''' %%YEAR%%
+* '''Gegenereerd op:''' %%GENERATION_TIMESTAMP%%
+
+== Data Structuur ==
+Deze module retourneert een Lua tabel `p` met de volgende structuur:
+* `p.dataset_id` (string): Het ID van de gebruikte CBS dataset.
+* `p.data_year` (number): Het jaar van de data.
+* `p.metadata` (tabel): Metadata voor de opgenomen statistieken. De sleutels zijn de volledige CBS sleutels (bv. <code>AantalInwoners_5</code>).
+* `p.data` (tabel): De kerncijfers per regio. De sleutels zijn de regiocodes (%%REGION_ID_KEY%%, bv. <code>GM0363</code>, <code>WK036301</code>).
+
+=== Belangrijke opmerkingen ===
+* Deze data is '''uitgekleed''' en bevat alleen de volgende statistieken (volledige CBS sleutels): <code>%%STATS_LIST_FULL%%</code>.
+* Deze data is '''gefilterd''' en bevat alleen regio's van het type: <code>%%REGION_TYPES%%</code>. Buurten zijn uitgesloten.
+
+== Gebruik ==
+Deze submodule wordt normaal gesproken niet direct aangeroepen, maar geladen door de hoofdmodule [[%%LUA_DISPATCHER_PATH%%]] wanneer het [[%%TEMPLATE_STAT_PATH%%|%%TEMPLATE_STAT_NAME%%]] sjabloon wordt gebruikt met <code>jaar=%%YEAR%%</code>.
+
+<includeonly>
+<!-- Plaats categorieën specifiek voor deze datamodule hier, indien nodig -->
+</includeonly>
