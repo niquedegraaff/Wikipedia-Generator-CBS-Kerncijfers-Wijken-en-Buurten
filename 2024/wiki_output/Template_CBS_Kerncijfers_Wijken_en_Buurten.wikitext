@@ -1,0 +1,1 @@
+<noinclude>{{Documentatie}}</noinclude><includeonly><!-- Info sjabloon. Gebruik [[Template:CBS_Kerncijfers_Wijken_en_Buurten_Stat|CBS_Kerncijfers_Wijken_en_Buurten_Stat]]. --></includeonly>

@@ -1,0 +1,39 @@
+== Doel ==
+Dit sjabloon haalt specifieke statistische gegevens (kerncijfers) op voor Nederlandse '''gemeenten''' en '''wijken''' voor een bepaald jaar uit de dataset Kerncijfers Wijken en Buurten van het [[CBS]].
+
+== Gebruiksaanwijzing ==
+<pre>
+{{{{%%TEMPLATE_STAT_NAME%%}}
+| jaar = <Jaartal, bv. %%YEAR%%>
+| regio = <Regiocode Gemeente/Wijk, bv. GM1680, WK168000>
+| stat = <Statistiek sleutel, bv. AantalInwoners>
+| bron = <Optioneel: 'ja' om bron te tonen>
+}}
+</pre>
+
+=== Parameters ===
+* '''<code>jaar</code>''' Verplicht. Het jaar (bv. 2024).
+* '''<code>regio</code>''' Verplicht. De regiocode (Codering_3) van '''Gemeente''' of '''Wijk'''.
+* '''<code>stat</code>''' Verplicht. De sleutel voor de statistiek (zie lijst).
+* '''<code>bron</code>''' Optioneel. <code>ja</code> toont bronvermelding.
+
+=== Belangrijke opmerkingen ===
+* Data is '''uitgekleed''' (bevat: %%STATS_LIST_USER%%) en '''gefilterd''' (types: %%REGION_TYPES%%). Buurten zijn uitgesloten.
+* Bij ontbrekende data wordt '-' getoond.
+
+=== Beschikbare Statistiek Sleutels (%%YEAR%%) ===
+{| class="wikitable sortable"
+|+ Beschikbare statistieken voor %%YEAR%%
+! Sleutel (<code>stat</code>)
+! Omschrijving (Bron: CBS Metadata)
+! Details
+|-
+%%AVAILABLE_STATS_TABLE%%
+|}
+
+== Technische details ==
+* Roept centrale module [[%%LUA_DISPATCHER_PATH%%]] aan.
+* Module laadt data uit submodule (bv. [[%%LUA_DATA_SUBMODULE_PATH%%]]).
+* Bron dataset CBS: %%DATASET_ID%% (of equivalent).
+
+<includeonly><!-- Categorieën hieronder --></includeonly>

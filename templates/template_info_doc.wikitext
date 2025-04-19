@@ -1,0 +1,24 @@
+{{Documentatie}}
+== Doel ==
+Centraal informatiepunt voor CBS Kerncijfers Wijken en Buurten data op deze wiki.
+
+== Gebruik ==
+Gebruik [[%%TEMPLATE_STAT_PATH%%|%%TEMPLATE_STAT_NAME%%]] om data weer te geven.
+
+=== Voorbeeld ===
+<pre>
+{{{{%%TEMPLATE_STAT_NAME%%}} |jaar=%%YEAR%% |regio=WK168000 |stat=AantalInwoners |bron=ja}}
+</pre>
+
+== Achtergrond ==
+Data wordt periodiek bijgewerkt via script en opgeslagen in modules zoals [[%%LUA_DATA_SUBMODULE_PATH%%]]. Sjabloon [[%%TEMPLATE_STAT_PATH%%|%%TEMPLATE_STAT_NAME%%]] gebruikt module [[%%LUA_DISPATCHER_PATH%%]].
+
+* Data is '''uitgekleed''' (stats: %%STATS_LIST_USER%%) en '''gefilterd''' (types: %%REGION_TYPES%%). Buurten uitgesloten.
+* Zie [[%%TEMPLATE_STAT_PATH%%/doc]] voor details.
+* Bron CBS: dataset %%DATASET_ID%% (of equivalent).
+
+=== Beschikbare data jaren ===
+* [[%%LUA_DATA_SUBMODULE_PATH%%|%%YEAR%%]]
+<!-- Voeg links naar andere jaarmodules toe -->
+
+<includeonly><!-- Categorieën hieronder --></includeonly>
