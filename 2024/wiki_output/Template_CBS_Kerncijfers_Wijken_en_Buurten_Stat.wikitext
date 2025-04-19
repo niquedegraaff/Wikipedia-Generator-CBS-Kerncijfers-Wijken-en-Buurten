@@ -1,1 +1,0 @@
-<noinclude>{{Documentatie}}</noinclude><includeonly>{{#if: {{#invoke:CBS_Kerncijfers_Wijken_en_Buurten_Data|getStat|jaar={{{jaar|2024}}}|regio={{{regio|}}}|stat={{{stat|}}}|bron={{{bron|}}}}} | {{#invoke:CBS_Kerncijfers_Wijken_en_Buurten_Data|getStat|jaar={{{jaar|2024}}}|regio={{{regio|}}}|stat={{{stat|}}}|bron={{{bron|}}}}} | - }}</includeonly>
