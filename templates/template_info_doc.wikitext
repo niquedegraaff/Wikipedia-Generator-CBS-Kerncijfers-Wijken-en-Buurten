@@ -7,7 +7,7 @@ Gebruik [[%%TEMPLATE_STAT_PATH%%|%%TEMPLATE_STAT_NAME%%]] om data weer te geven.
 
 === Voorbeeld ===
 <pre>
-{{{{%%TEMPLATE_STAT_NAME%%}} |jaar=%%YEAR%% |regio=WK168000 |stat=AantalInwoners |bron=ja}}
+{{{{%%TEMPLATE_STAT_NAME%%}} |jaar=%%YEAR%% |regio=WK168000 |stat=AantalInwoners}}
 </pre>
 
 == Achtergrond ==

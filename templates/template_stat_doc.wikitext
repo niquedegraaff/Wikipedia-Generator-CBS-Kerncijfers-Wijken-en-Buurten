@@ -1,46 +1,69 @@
+{{Documentatie}}
 == Doel ==
-Dit sjabloon haalt specifieke statistische gegevens (kerncijfers) op voor Nederlandse '''gemeenten''' en '''wijken''' voor een bepaald jaar EN kan een gestandaardiseerde [[Help:Referenties en voetnoten|referentie]] genereren voor de gebruikte dataset.
+Dit sjabloon faciliteert het eenvoudig weergeven van specifieke gegevens uit de '''Kerncijfers Wijken en Buurten''' van het [[Centraal Bureau voor de Statistiek|CBS]]. Het haalt data op voor een specifiek '''jaar''' en een specifieke '''regio''' (gemeente of wijk). Het kan ook een gestandaardiseerde [[Help:Referenties en voetnoten|referentie]] naar de gebruikte dataset genereren.
 
-== Gebruiksaanwijzing ==
+== Gebruik ==
+Er zijn twee hoofdmanieren om dit sjabloon te gebruiken: data ophalen of een referentie genereren.
+
+=== Data ophalen ===
+Om een specifiek kerncijfer weer te geven:
+{{Gebruik sjabloon|%%TEMPLATE_STAT_NAME%%|1={{P|jaar|JAAR}} |2={{P|regio|REGIOCODE}} |3={{P|stat|STATISTIEK}} }}
 <pre>
-{{{{%%TEMPLATE_STAT_NAME%%}}
-| jaar = <Jaartal, bv. %%YEAR%%>
-| regio = <Regiocode Gemeente/Wijk, bv. GM1680, WK168000>
-| stat = <Statistiek sleutel, bv. AantalInwoners>
-| bron = <Optioneel: 'ja' om bron te tonen>
+{{%%TEMPLATE_STAT_NAME%%
+| jaar = JAAR
+| regio = REGIOCODE
+| stat = STATISTIEK
 }}
 </pre>
+* '''JAAR''': Het jaartal van de gewenste data (bv. <code>%%YEAR%%</code>).
+* '''REGIOCODE''': De code van de '''Gemeente''' (bv. <code>GM1680</code>) of '''Wijk''' (bv. <code>WK168000</code>). Zie [[Lijst van Nederlandse gemeenten]] of CBS voor codes.
+* '''STATISTIEK''': De sleutel van het gewenste kerncijfer (bv. <code>AantalInwoners</code>). Zie de tabel hieronder.
+
+==== Voorbeelden data ophalen (%%YEAR%%) ====
+* Aantal inwoners van gemeente Aa en Hunze (GM1680):
+*: <code><nowiki>{{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |regio=GM1680 |stat=AantalInwoners}}</nowiki></code> → {{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |regio=GM1680 |stat=AantalInwoners}}
+* Woningvoorraad in Wijk 00 Annen (WK168000):
+*: <code><nowiki>{{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |regio=WK168000 |stat=Woningvoorraad}}</nowiki></code> → {{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |regio=WK168000 |stat=Woningvoorraad}}
+* Ontbrekende data (fictieve code WK999999):
+*: <code><nowiki>{{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |regio=WK999999 |stat=AantalInwoners}}</nowiki></code> → {{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |regio=WK999999 |stat=AantalInwoners}} (Toont standaard '-')
 
 === Referentie genereren ===
-Om een herbruikbare referentie naar de CBS dataset voor een specifiek jaar te genereren (om onderaan de pagina te plaatsen met <code><nowiki><references /></nowiki></code>):
+Om een herbruikbare referentie (<nowiki><ref name="...">...</ref></nowiki>) naar de CBS dataset voor een specifiek jaar te genereren:
 <pre>
-{{{{%%TEMPLATE_STAT_NAME%%}} |jaar=%%YEAR%% |stat=Ref}}
+{{%%TEMPLATE_STAT_NAME%% |jaar=JAAR |stat=Ref}}
 </pre>
-Dit genereert een <code><nowiki><ref name="CBS_KWB%%YEAR%%">...</ref></nowiki></code> tag. Je kunt deze eenmalig op de pagina plaatsen (bij voorkeur direct na het eerste gebruik van data uit dat jaar) en de naam eventueel elders hergebruiken met <code><nowiki><ref name="CBS_KWB%%YEAR%%" /></nowiki></code>.
+* '''JAAR''': Het jaartal van de dataset waarnaar verwezen moet worden (bv. <code>%%YEAR%%</code>).
+* '''stat''': Moet exact <code>Ref</code> zijn.
 
-=== Parameters ===
-* '''<code>jaar</code>''' Verplicht. Het jaar (bv. 2024).
-* '''<code>regio</code>''' Verplicht. De regiocode (Codering_3) van '''Gemeente''' of '''Wijk'''.
-* '''<code>stat</code>''' Verplicht. De sleutel voor de statistiek (zie lijst).
-* '''<code>bron</code>''' Optioneel. <code>ja</code> toont bronvermelding.
+==== Voorbeeld referentie genereren (%%YEAR%%) ====
+* Genereer de referentie voor de dataset van %%YEAR%%:
+*: <code><nowiki>{{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |stat=Ref}}</nowiki></code>
+*: ''Resultaat (onzichtbaar op de pagina, maar voegt voetnoot toe):'' {{%%TEMPLATE_STAT_NAME%% |jaar=%%YEAR%% |stat=Ref}}
+* Plaats onderaan het artikel (in de sectie Bronnen, noten en/of referenties).
+* Eventuele volgende verwijzingen naar dezelfde bron kunnen met: <code><nowiki><ref name="CBS_KWB%%YEAR%%" /></nowiki></code>
 
-=== Belangrijke opmerkingen ===
-* Data is '''uitgekleed''' (bevat: %%STATS_LIST_USER%%) en '''gefilterd''' (types: %%REGION_TYPES%%). Buurten zijn uitgesloten.
-* Bij ontbrekende data wordt '-' getoond.
+== Beschikbare statistieken ==
+De volgende sleutels kunnen worden gebruikt voor de parameter <code>stat</code> (naast de speciale waarde <code>Ref</code>).
 
-=== Beschikbare Statistiek Sleutels (%%YEAR%%) ===
 {| class="wikitable sortable"
-|+ Beschikbare statistieken voor %%YEAR%%
+|+ Beschikbare statistieken voor %%YEAR%% (Bron dataset: %%DATASET_ID%%)
 ! Sleutel (<code>stat</code>)
 ! Omschrijving (Bron: CBS Metadata)
-! Details
+! Details / CBS Sleutel
 |-
 %%AVAILABLE_STATS_TABLE%%
 |}
 
-== Technische details ==
-* Roept centrale module [[%%LUA_DISPATCHER_PATH%%]] aan.
-* Module laadt data uit submodule (bv. [[%%LUA_DATA_SUBMODULE_PATH%%]]).
-* Bron dataset CBS: %%DATASET_ID%% (of equivalent).
+== Belangrijke opmerkingen ==
+* De onderliggende data is '''uitgekleed''' en bevat alleen de hierboven genoemde statistieken.
+* De data is '''gefilterd''' en bevat alleen gegevens voor regio's van het type: <code>%%REGION_TYPES%%</code>. Data voor buurten is uitgesloten.
 
-<includeonly><!-- Categorieën hieronder --></includeonly>
+== Technische details ==
+* Dit sjabloon roept de centrale module [[%%LUA_DISPATCHER_PATH%%]] aan.
+* Deze module laadt vervolgens de data uit de jaar-specifieke submodule (bv. [[%%LUA_DATA_SUBMODULE_PATH%%]]).
+
+<includeonly>{{#ifeq:{{NAMESPACE}}|{{ns:10}}|
+<!-- Plaats categorieën alleen als het sjabloon direct wordt gebruikt in de Sjabloon naamruimte, niet op de /doc pagina zelf -->
+[[Categorie:Wikipedia:Sjablonen statistieken|CBS Kerncijfers]]
+[[Categorie:Wikipedia:Sjablonen Nederland|CBS Kerncijfers]]
+}}</includeonly>

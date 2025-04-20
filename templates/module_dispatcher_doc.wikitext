@@ -12,12 +12,11 @@ De hoofdfunctie is <code>getStat(frame)</code>. Deze functie:
 # Formatteert de uitvoer:
 #* Geeft <code>nil</code> terug als vereiste parameters ontbreken of als data ontbreekt (het aanroepende sjabloon toont dan meestal '-').
 #* Geeft een foutmelding terug bij ongeldige input of als een module niet geladen kan worden.
-#* Voegt optioneel een bronvermelding toe als <code>bron=ja</code> is opgegeven.
 
 === Alias Mapping ===
 De <code>getStat</code> functie vertaalt de volgende gebruikersvriendelijke <code>stat</code> namen naar de interne CBS-sleutels die in de data submodules worden gebruikt:
 {| class="wikitable"
-! Gebruikersnaam (<code>stat</code>)
+! Alias (<code>stat</code>)
 ! Interne CBS Sleutel
 |-
 %%ALIAS_TABLE_ROWS%%

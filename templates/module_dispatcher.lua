@@ -59,7 +59,7 @@ function p.getStat(frame)
         -- Genereer de <ref> tag
         local ref_tag = mw.text.tag{ name = 'ref', attrs = { name = ref_name }, content = citation_wikitext }
 
-        return ref_tag
+        return frame:preprocess(ref_tag)
     end
 
     -- === Code hieronder wordt alleen uitgevoerd als stat NIET 'Ref' is ===
@@ -110,8 +110,10 @@ function p.getStat(frame)
     if output_value == nil then
         return nil
     else
-        return tostring(output_value) .. bron_suffix
+        -- Geef alleen de waarde terug
+        return tostring(output_value)
     end
+
 end
 
 return p
