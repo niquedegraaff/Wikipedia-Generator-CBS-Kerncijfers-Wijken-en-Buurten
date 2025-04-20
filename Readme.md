@@ -117,16 +117,16 @@ Volg deze stappen om de gegenereerde code op een MediaWiki-wiki te implementeren
     *   Maak/update de `/doc` subpagina (`Template:CBS_Kerncijfers_Wijken_en_Buurten_Stat/doc`) met de inhoud van het corresponderende `_doc.wikitext` bestand.
     *   Doe hetzelfde voor `Template:CBS_Kerncijfers_Wijken_en_Buurten` en zijn `/doc` pagina.
 
-## Voorbeeld op Wiki
+## Voorbeeld gebruik in wiki pagina's
 
-Data ophalen:
+Aantal inwoners meest recent:
 ```wikitext
-Aantal inwoners meest recent: {{CBS_Kerncijfers_Wijken_en_Buurten_Stat |regio=GM1680 |stat=AantalInwoners}}
+{{CBS_Kerncijfers_Wijken_en_Buurten_Stat |regio=GM1680 |stat=AantalInwoners}}
 ```
 
-Met jaartal:
+Aantal inwoners in 2024:
 ```wikitext
-Aantal inwoners in 2024: {{CBS_Kerncijfers_Wijken_en_Buurten_Stat |jaar=2024 |regio=GM1680 |stat=AantalInwoners}}
+{{CBS_Kerncijfers_Wijken_en_Buurten_Stat |jaar=2024 |regio=GM1680 |stat=AantalInwoners}}
 ```
 
 Referentie genereren:
