@@ -79,7 +79,7 @@ python main.py <jaar> [opties]
 **Voorbeeld:** Data voor 2023 genereren, waarbij de cache met gestripte data opnieuw wordt opgebouwd:
 
 ```bash
-python generate_kwb_wiki_data.py 2023 --overwrite-stripped
+python main.py 2023 --overwrite-stripped
 ```
 
 ## Gegenereerde Bestanden
