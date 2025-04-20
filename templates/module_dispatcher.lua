@@ -27,12 +27,42 @@ function p.getStat(frame)
     local jaar_arg = args.jaar or parent_args.jaar or ''
     local regio_arg = args.regio or parent_args.regio or ''
     local stat_arg = args.stat or parent_args.stat or ''
-    local show_bron_arg = args.bron or parent_args.bron or ''
 
     local jaar = mw.text.trim(jaar_arg)
     local regio = mw.text.trim(regio_arg)
     local stat_alias = mw.text.trim(stat_arg)
-    local show_bron = mw.text.trim(show_bron_arg):lower()
+
+    if stat_alias == 'Ref' then
+        if jaar == '' then
+            return '<span class="error">Fout: Jaar parameter is vereist voor stat=Ref.</span>'
+        end
+        local data_module, err = get_data_module(jaar)
+        if not data_module then
+            return '<span class="error">' .. (err or 'Laden data module mislukt voor Ref.') .. '</span>'
+        end
+        local ds_id = data_module.dataset_id or 'ONBEKEND'
+        local d_year = data_module.data_year or jaar
+        local ref_name = 'CBS_KWB_' .. d_year
+        local ref_url = 'https://opendata.cbs.nl/statline/#/CBS/nl/dataset/' .. ds_id .. '/table?dl=40544'
+        local ref_titel = 'Kerncijfers Wijken en Buurten ' .. d_year
+        local ref_uitgever = 'CBS'
+
+        -- Bouw de {{Citeer web}} aanroep binnen de <ref> tag
+        -- Gebruik mw.text.tag voor correcte <ref> generatie
+        local cite_web_args = {
+            ['url'] = ref_url,
+            ['titel'] = ref_titel,
+            ['uitgever'] = ref_uitgever,
+        }
+        -- Roep het Citeer web sjabloon aan binnen Lua
+        local citation_wikitext = frame:expandTemplate{ title = 'Citeer web', args = cite_web_args }
+        -- Genereer de <ref> tag
+        local ref_tag = mw.text.tag{ name = 'ref', attrs = { name = ref_name }, content = citation_wikitext }
+
+        return ref_tag
+    end
+
+    -- === Code hieronder wordt alleen uitgevoerd als stat NIET 'Ref' is ===
 
     -- <<< Check lege regio/stat VOORDAT module geladen wordt >>>
     if regio == '' or stat_alias == '' then
@@ -75,15 +105,6 @@ function p.getStat(frame)
         end
     else
         output_value = value
-    end
-
-    -- Bronvermelding
-    local bron_suffix = ''
-    if show_bron == 'ja' or show_bron == 'yes' or show_bron == '1' then
-         local ds_id = data_module.dataset_id or 'ONBEKEND'
-         local d_year = data_module.data_year or jaar
-         local cbs_link = 'https://opendata.cbs.nl/statline/#/CBS/nl/dataset/' .. ds_id .. '/table?dl=40544'
-         bron_suffix = ' <small>([https://opendata.cbs.nl/ CBS], KWB ' .. d_year .. ')</small>'
     end
 
     if output_value == nil then

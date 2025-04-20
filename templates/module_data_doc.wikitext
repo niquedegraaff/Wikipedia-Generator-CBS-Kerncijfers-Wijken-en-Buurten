@@ -1,4 +1,4 @@
-{{Documentatie}}
+{{Doc subpagina}}
 Deze submodule bevat de verwerkte data uit de '''Kerncijfers Wijken en Buurten %%YEAR%%''' dataset van het [[CBS]].
 
 * '''Bron Dataset ID:''' %%DATASET_ID%% <ref name="CBS_KWB%%YEAR%%">{{Citeer web|url=https://opendata.cbs.nl/statline/#/CBS/nl/dataset/%%DATASET_ID%%/table?dl=40544|titel=Kerncijfers Wijken en Buurten %%YEAR%%|uitgever=CBS}}</ref>

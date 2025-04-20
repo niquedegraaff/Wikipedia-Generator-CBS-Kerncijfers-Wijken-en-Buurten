@@ -1,5 +1,5 @@
 == Doel ==
-Dit sjabloon haalt specifieke statistische gegevens (kerncijfers) op voor Nederlandse '''gemeenten''' en '''wijken''' voor een bepaald jaar uit de dataset Kerncijfers Wijken en Buurten van het [[CBS]].
+Dit sjabloon haalt specifieke statistische gegevens (kerncijfers) op voor Nederlandse '''gemeenten''' en '''wijken''' voor een bepaald jaar EN kan een gestandaardiseerde [[Help:Referenties en voetnoten|referentie]] genereren voor de gebruikte dataset.
 
 == Gebruiksaanwijzing ==
 <pre>
@@ -10,6 +10,13 @@ Dit sjabloon haalt specifieke statistische gegevens (kerncijfers) op voor Nederl
 | bron = <Optioneel: 'ja' om bron te tonen>
 }}
 </pre>
+
+=== Referentie genereren ===
+Om een herbruikbare referentie naar de CBS dataset voor een specifiek jaar te genereren (om onderaan de pagina te plaatsen met <code><nowiki><references /></nowiki></code>):
+<pre>
+{{{{%%TEMPLATE_STAT_NAME%%}} |jaar=%%YEAR%% |stat=Ref}}
+</pre>
+Dit genereert een <code><nowiki><ref name="CBS_KWB%%YEAR%%">...</ref></nowiki></code> tag. Je kunt deze eenmalig op de pagina plaatsen (bij voorkeur direct na het eerste gebruik van data uit dat jaar) en de naam eventueel elders hergebruiken met <code><nowiki><ref name="CBS_KWB%%YEAR%%" /></nowiki></code>.
 
 === Parameters ===
 * '''<code>jaar</code>''' Verplicht. Het jaar (bv. 2024).
